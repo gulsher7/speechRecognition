@@ -4,7 +4,7 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
-	<key>CFBundleDisplayName</key>``
+	<key>CFBundleDisplayName</key>
 	<string>speechRecognistion</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
@@ -38,9 +38,9 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>NSMicrophoneUsageDescription</key>
-  <string>Your app required to access your microphone</string>
-  <key>NSSpeechRecognitionUsageDescription</key>
-  <string>Your app required to access your speech recognition</string>
+  	<string>Description of why you require the use of the microphone</string>
+  	<key>NSSpeechRecognitionUsageDescription</key>
+  	<string>Description of why you require the use of the speech recognition</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>

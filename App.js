@@ -1,249 +1,120 @@
-import React, { useState, useEffect } from 'react';
-import {
-    StyleSheet,
-    Text,
-    View,
-    SafeAreaView,
-    Image,
-    TouchableHighlight,
-    ScrollView,
-    Platform
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Image, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Voice from '@react-native-community/voice';
 
-export default function TextToSpeech() {
+const App = () => {
 
-    const [pitch, setPitch] = useState('')
-    const [error, setError] = useState('')
-    const [started, setStarted] = useState('')
-    const [results, setResults] = useState([])
-    const [partialResults, setPartialResults] = useState([])
-    const [end, setEnd] = useState('')
+  const [result, setResult] = useState('')
+  const [isLoading, setLoading] = useState(false)
 
-    useEffect(() => {
-        function onSpeechStart(e) {
-            console.log('onSpeechStart: ', e);
-            setStarted('√')
-        };
-        function onSpeechResults(e) {
-            console.log('onSpeechResults: ', e);
-            setResults(e.value)
-        };
-        function onSpeechPartialResults(e) {
-            console.log('onSpeechPartialResults: ', e);
-            setPartialResults(e.value)
-        };
-        function onSpeechVolumeChanged(e) {
-            console.log('onSpeechVolumeChanged: ', e);
-            setPitch(e.value)
-        };
-        Voice.onSpeechStart = onSpeechStart;
+  useEffect(() => {
+    Voice.onSpeechStart = onSpeechStartHandler;
+    Voice.onSpeechEnd = onSpeechEndHandler;
+    Voice.onSpeechResults = onSpeechResultsHandler;
 
-        Voice.onSpeechResults = onSpeechResults;
-        Voice.onSpeechPartialResults = onSpeechPartialResults;
-        Voice.onSpeechVolumeChanged = onSpeechVolumeChanged;
-        return () => {
-            Voice.destroy().then(Voice.removeAllListeners);
-        };
-    }, []);
-
-    const _startRecognizing = async () => {
-        setPitch('')
-        setError('')
-        setStarted('')
-        setResults([])
-        setPartialResults([])
-        setEnd('')
-        try {
-            await Voice.start('en-US');
-        } catch (e) {
-            console.error(e);
-        }
-    };
-    const _stopRecognizing = async () => {
-        //Stops listening for speech
-        try {
-            await Voice.stop();
-        } catch (e) {
-            console.error(e);
-        }
-    };
-    const _cancelRecognizing = async () => {
-        //Cancels the speech recognition
-        try {
-            await Voice.cancel();
-        } catch (e) {
-            console.error(e);
-        } error(e);
+    return () => {
+      Voice.destroy().then(Voice.removeAllListeners);
     }
+  }, [])
 
-    const _destroyRecognizer = async () => {
-        //Destroys the current SpeechRecognizer instance
-        try {
-            await Voice.destroy();
-        } catch (e) {
-            console.error(e);
-        }
-        setPitch('')
-        setError('')
-        setStarted('')
-        setResults([])
-        setPartialResults([])
-        setEnd('')
-    };
-    return (
-        <SafeAreaView style={{ flex: 1 }}>
-            <View style={styles.container}>
-                <Text style={styles.welcome}>
-                    Example of Speech to Text conversion / Voice Recognition
-          </Text>
-                <Text style={styles.instructions}>
-                    Press mike to start Recognition
-          </Text>
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        paddingVertical: 10,
-                    }}>
-                    <Text
-                        style={{
-                            flex: 1,
-                            textAlign: 'center',
-                            color: '#B0171F',
-                        }}>{`Started: ${started}`}</Text>
-                    <Text
-                        style={{
-                            flex: 1,
-                            textAlign: 'center',
-                            color: '#B0171F',
-                        }}>{`End: ${end}`}</Text>
-                </View>
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        paddingVertical: 10,
-                    }}>
-                    <Text
-                        style={{
-                            flex: 1,
-                            textAlign: 'center',
-                            color: '#B0171F',
-                        }}>{`Pitch \n ${pitch}`}</Text>
-                    <Text
-                        style={{
-                            flex: 1,
-                            textAlign: 'center',
-                            color: '#B0171F',
-                        }}>{`Error \n ${error}`}</Text>
-                </View>
-                <TouchableHighlight
-                    onPress={_startRecognizing}
-                    style={{ marginVertical: 20 }}>
-                    <Image
-                        style={styles.button}
-                        source={{
-                            uri:
-                                'https://raw.githubusercontent.com/AboutReact/sampleresource/master/microphone.png',
-                        }}
-                    />
-                </TouchableHighlight>
-                <Text
-                    style={{
-                        textAlign: 'center',
-                        color: '#B0171F',
-                        marginBottom: 1,
-                        fontWeight: '700',
-                    }}>
-                    Partial Results
-          </Text>
-                <ScrollView>
-                    {partialResults.map((result, index) => {
-                        return (
-                            <Text
-                                key={`partial-result-${index}`}
-                                style={{
-                                    textAlign: 'center',
-                                    color: '#B0171F',
-                                    marginBottom: 1,
-                                    fontWeight: '700',
-                                }}>
-                                {result}
-                            </Text>
-                        );
-                    })}
-                </ScrollView>
-                <Text style={styles.stat}>Results</Text>
-                <ScrollView style={{ marginBottom: 42 }}>
-                    {results.map((result, index) => {
-                        return (
-                            <Text key={`result-${index}`} style={styles.stat}>
-                                {result}
-                            </Text>
-                        );
-                    })}
-                </ScrollView>
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        alignItems: 'space-between',
-                        position: 'absolute',
-                        bottom: 0,
-                    }}>
-                    <TouchableHighlight
-                        onPress={_stopRecognizing}
-                        style={{ flex: 1, backgroundColor: 'red' }}>
-                        <Text style={styles.action}>Stop</Text>
-                    </TouchableHighlight>
-                    <TouchableHighlight
-                        onPress={_cancelRecognizing}
-                        style={{ flex: 1, backgroundColor: 'red' }}>
-                        <Text style={styles.action}>Cancel</Text>
-                    </TouchableHighlight>
-                    <TouchableHighlight
-                        onPress={_destroyRecognizer}
-                        style={{ flex: 1, backgroundColor: 'red' }}>
-                        <Text style={styles.action}>Destroy</Text>
-                    </TouchableHighlight>
-                </View>
-            </View>
-        </SafeAreaView>
-    )
-}
+  const onSpeechStartHandler = (e) => {
+    console.log("start handler==>>>", e)
+  }
+  const onSpeechEndHandler = (e) => {
+    setLoading(false)
+    console.log("stop handler", e)
+  }
+
+  const onSpeechResultsHandler = (e) => {
+    let text = e.value[0]
+    setResult(text)
+    console.log("speech result handler", e)
+  }
+
+  const startRecording = async () => {
+    setLoading(true)
+    try {
+      await Voice.start('en-Us')
+    } catch (error) {
+      console.log("error raised", error)
+    }
+  }
+
+  const stopRecording = async () => {
+    try {
+      await Voice.stop()
+    } catch (error) {
+      console.log("error raised", error)
+    }
+  }
+
+
+  return (
+    <View style={styles.container}>
+      <SafeAreaView>
+        <Text style={styles.headingText}>Speech Recoginition</Text>
+        <View style={styles.textInputStyle}>
+          <TextInput
+            value={result}
+            placeholder="your text"
+            style={{ flex: 1 }}
+            onChangeText={text => setResult(text)}
+          />
+          {isLoading ? <ActivityIndicator size="large" color="red" />
+
+            :
+            
+            <TouchableOpacity
+              onPress={startRecording}
+            >
+              <Image
+                source={{ uri: 'https://raw.githubusercontent.com/AboutReact/sampleresource/master/microphone.png' }}
+                style={{ width: 25, height: 25 }}
+              />
+            </TouchableOpacity>}
+        </View>
+
+        <TouchableOpacity
+          style={{
+            alignSelf: 'center',
+            marginTop: 24,
+            backgroundColor: 'red',
+            padding: 8,
+            borderRadius: 4
+          }}
+          onPress={stopRecording}
+        >
+          <Text style={{ color: 'white', fontWeight: 'bold' }}>Stop</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
-    button: {
-        width: 50,
-        height: 50,
-    },
-    container: {
-        flex: 1,
-        flexDirection: 'column',
-        alignItems: 'center',
-        backgroundColor: '#F5FCFF',
-    },
-    welcome: {
-        fontSize: 20,
-        textAlign: 'center',
-        margin: 10,
-    },
-    action: {
-        width: '100%',
-        textAlign: 'center',
-        color: 'white',
-        paddingVertical: 8,
-        marginVertical: 5,
-        fontWeight: 'bold',
-    },
-    instructions: {
-        textAlign: 'center',
-        color: '#333333',
-        marginBottom: 5,
-    },
-    stat: {
-        textAlign: 'center',
-        color: '#B0171F',
-        marginBottom: 1,
-        marginTop: 30,
-    },
+  container: {
+    flex: 1,
+    padding: 24
+  },
+  headingText: {
+    alignSelf: 'center',
+    marginVertical: 26,
+    fontWeight: 'bold',
+    fontSize: 26
+  },
+  textInputStyle: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    height: 48,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 2,
+    elevation: 2,
+    shadowOpacity: 0.4
+  }
 });
+
+export default App;
